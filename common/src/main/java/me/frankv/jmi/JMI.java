@@ -44,9 +44,13 @@ public class JMI {
                 jmiEventBus.sendEvent(new Event.ResetDataEvent());
                 log.debug("all data cleared");
             }
+            return;
         }
 
-        if (!haveDim) firstLogin = haveDim = true;
+        if (!haveDim) {
+            firstLogin = true;
+            haveDim = true;
+        }
     }
 
 

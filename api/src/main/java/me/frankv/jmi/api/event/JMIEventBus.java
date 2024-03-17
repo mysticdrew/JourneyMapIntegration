@@ -25,7 +25,8 @@ public class JMIEventBus {
     public <T extends Event> void sendEvent(T event) {
         Stream.ofNullable(eventHandlers.get(event.getClass()))
                 .flatMap(Collection::stream)
-                .filter(consumer -> consumer.getClass().getGenericSuperclass().equals(event.getClass()))
+//                .peek(consumer -> log.info(consumer.getClass().getTypeName()))
+//                .filter(consumer -> consumer.getClass().getGenericSuperclass().equals(event.getClass()))
                 .forEach(consumer -> {
                     try {
                         ((Consumer<T>) consumer).accept(event);

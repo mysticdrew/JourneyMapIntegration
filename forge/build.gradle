@@ -25,6 +25,7 @@ minecraft {
                     source project(":common").sourceSets.main
                     source project(":api").sourceSets.main
                     source project(":compat-waystones").sourceSets.main
+                    source project(":compat-ftbchunks").sourceSets.main
                 }
             }
         }
@@ -42,6 +43,7 @@ minecraft {
                     source project(":common").sourceSets.main
                     source project(":api").sourceSets.main
                     source project(":compat-waystones").sourceSets.main
+                    source project(":compat-ftbchunks").sourceSets.main
                 }
             }
         }
@@ -60,6 +62,7 @@ minecraft {
                     source project(":common").sourceSets.main
                     source project(":api").sourceSets.main
                     source project(":compat-waystones").sourceSets.main
+                    source project(":compat-ftbchunks").sourceSets.main
                 }
             }
         }
@@ -72,13 +75,15 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
 
-    implementation project(':api')
-    implementation project(":common")
+    compileOnly project(':api')
+    compileOnly project(":common")
+    compileOnly project(':compat-waystones')
+    compileOnly project(':compat-ftbchunks')
 
-//    implementation fg.deobf("dev.architectury:architectury-forge:${project.architectury_version}")
-//    implementation fg.deobf("dev.ftb.mods:ftb-library-forge:${project.ftb_library_version}")
-//    implementation fg.deobf("dev.ftb.mods:ftb-teams-forge:${project.ftb_teams_version}")
-//    implementation fg.deobf("dev.ftb.mods:ftb-chunks-forge:${project.ftb_chunks_version}")
+    implementation fg.deobf("dev.architectury:architectury-forge:${project.architectury_version}")
+    implementation fg.deobf("dev.ftb.mods:ftb-library-forge:${project.ftb_library_version}")
+    implementation fg.deobf("dev.ftb.mods:ftb-teams-forge:${project.ftb_teams_version}")
+    implementation fg.deobf("dev.ftb.mods:ftb-chunks-forge:${project.ftb_chunks_version}")
     implementation fg.deobf("maven.modrinth:balm:${project.balm_forge_version}")
     implementation fg.deobf("maven.modrinth:waystones:${project.waystones_forge_version}")
 
@@ -89,6 +94,7 @@ dependencies {
 
 mixin {
     add project(":common").sourceSets.main, "${mod_id}.refmap.json"
+    add project(":compat-ftbchunks").sourceSets.main, "${mod_id}.refmap.json"
     config "${mod_id}.mixins.json"
 
     debug.verbose = true
@@ -102,12 +108,15 @@ tasks.withType(JavaCompile).configureEach {
     source(project(":common").sourceSets.main.allSource)
     source(project(":api").sourceSets.main.allSource)
     source(project(":compat-waystones").sourceSets.main.allSource)
+    source(project(":compat-ftbchunks").sourceSets.main.allSource)
 }
 
 processResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from project(":common").sourceSets.main.resources
     from project(":api").sourceSets.main.resources
     from project(":compat-waystones").sourceSets.main.resources
+    from project(":compat-ftbchunks").sourceSets.main.resources
 }
 
 jar {
@@ -126,9 +135,31 @@ jar {
                 'MixinConfigs'            : "jmi.mixins.json"
         ])
     }
+
+//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//    from(sourceSets.main.output) {
+//        include 'META-INF/services/*'
+//    }
+//    eachFile { FileCopyDetails details ->
+//        if(details.name.startsWith("META-INF/services/")){
+//            details.filter(ChainFilter(Reader::readLines), "UTF-8")
+//            details.appendingCharset = 'UTF-8'
+//        }
+//    }
 }
 
+//shadowJar {
+//    mergeServiceFiles()
+//}
+//
+//build.dependsOn shadowJar
 jar.finalizedBy('reobfJar')
+
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
+}
 
 def ENV = System.getenv()
 def release_title = "[Forge] v${version}"
@@ -155,6 +186,7 @@ if (ENV.CF_TOKEN) {
             changelogType = 'markdown'
         }
     }
+
 }
 
 if (ENV.MODRINTH_TOKEN) {

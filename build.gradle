@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.4-SNAPSHOT' apply false
+    id 'fabric-loom' version '1.5-SNAPSHOT' apply false
 }
 
 subprojects {
@@ -42,11 +42,18 @@ subprojects {
             content {
             }
         }
+//
+//        maven {
+//            url "https://maven.saps.dev/minecraft"
+//            content {
+//                includeGroup "dev.latvian.mods"
+//                includeGroup "dev.ftb.mods"
+//            }
+//        }
 
         maven {
-            url "https://maven.saps.dev/minecraft"
+            url "https://maven.saps.dev/snapshots"
             content {
-                includeGroup "dev.latvian.mods"
                 includeGroup "dev.ftb.mods"
             }
         }
